@@ -1,0 +1,36 @@
+# Build outputs
+output/
+*_build*/
+*.qcow2
+*.raw
+*.iso
+
+# Signing keys (keep public, ignore private)
+cosign.key
+!cosign.pub
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.code-workspace
+
+# Build artifacts
+previous.manifest.json
+changelog.md
+output.env

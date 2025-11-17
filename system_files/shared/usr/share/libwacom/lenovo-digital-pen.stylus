@@ -1,0 +1,18 @@
+# Lenovo Digital Pen (AES 2.0 protocol)
+# Ships with Yoga Duet 7 13IML05
+# 4096 pressure levels, 2 side buttons, no eraser
+
+[Device]
+Name=Lenovo Digital Pen
+DeviceMatch=*:*:*
+
+[Features]
+PairedTo=*
+
+[Buttons]
+Button0=1;Secondary;Menu;
+Button1=2;Tertiary;Inward;
+
+[Axes]
+0=TipPressure;4096;0;4095
+1=Tilt;1;0;90

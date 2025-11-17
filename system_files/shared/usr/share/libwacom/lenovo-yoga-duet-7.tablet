@@ -1,0 +1,25 @@
+# Lenovo Yoga Duet 7 13IML05 (82AS)
+# 13.0" touchscreen with ELAN digitizer (2160x1350)
+# Display: 293mm x 165mm (11.5" x 6.5")
+# Pen: Lenovo Digital Pen with AES 2.0
+
+[Device]
+Name=Lenovo Yoga Duet 7 13IML05
+ModelName=82AS
+Class=ISDV4
+Width=12
+Height=7
+IntegratedIn=Display;System
+
+# Device match patterns - common ELAN IDs for Yoga Duet 7
+# User should run: libwacom-list-local-devices to confirm actual ID
+# Multiple matches to cover firmware variations
+DeviceMatch=i2c:04F3:2A49;i2c:04F3:2A4A;i2c:04F3:2A62;i2c:04F3:2A69
+
+[Features]
+Stylus=true
+Touch=true
+Buttons=0
+Reversible=false
+
+[Buttons]
