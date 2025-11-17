@@ -60,6 +60,7 @@ AttrTabletSmoothing=0.5
 EOF
 
 # Improve touchpad/touch response
+mkdir -p /etc/libinput/local-overrides.d
 cat > /etc/libinput/local-overrides.d/99-yoga-duet.conf << 'EOF'
 # Additional libinput tweaks for Yoga Duet 7
 # Reduce touch latency and improve palm rejection

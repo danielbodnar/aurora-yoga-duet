@@ -9,6 +9,9 @@ set -ouex pipefail
 
 echo "=== Expected Hardware IDs for Yoga Duet 7 13IML05 (82AS) ==="
 
+# Create documentation directory
+mkdir -p /usr/share/doc/aurora-yoga-duet
+
 # Document expected device IDs (for reference in libwacom and udev rules)
 cat > /usr/share/doc/aurora-yoga-duet/hardware-ids.txt << 'EOF'
 # Lenovo Yoga Duet 7 13IML05 (82AS) Expected Hardware IDs
