@@ -87,6 +87,62 @@ just run-vm
 just --list
 ```
 
+## GitHub Actions Setup
+
+### First-Time Setup
+
+When forking this repository, the GitHub Actions workflow may fail with a 403 error on the first run. This is because the GitHub Container Registry package doesn't exist yet. There are two ways to resolve this:
+
+#### Option 1: Wait for Automatic Creation (Recommended)
+
+The workflow is configured to automatically create the package on first push to the `main` branch. Simply:
+
+1. Ensure GitHub Actions is enabled in your fork (Settings → Actions → General)
+2. Push a commit to the `main` branch or manually trigger the workflow
+3. The package should be created automatically
+
+If you get a 403 error, try option 2.
+
+#### Option 2: Manual First Push
+
+If the automatic creation fails, you can create the package manually:
+
+```bash
+# Login to GHCR
+echo $GITHUB_TOKEN | podman login ghcr.io -u <your-username> --password-stdin
+
+# Build the image
+just build
+
+# Tag and push manually
+podman tag localhost/aurora-yoga-duet:latest ghcr.io/<your-username>/aurora-yoga-duet:latest
+podman push ghcr.io/<your-username>/aurora-yoga-duet:latest
+```
+
+After the first successful push, subsequent GitHub Actions runs should work automatically.
+
+### Workflow Triggers
+
+The build workflow triggers on:
+- Push to `main` branch
+- Pull requests to `main`
+- Weekly schedule (Sundays at 3:00 AM UTC)
+- Manual workflow dispatch
+
+### Signing Keys
+
+To enable image signing with cosign:
+
+1. Generate a signing key pair:
+   ```bash
+   cosign generate-key-pair
+   ```
+
+2. Add the private key to repository secrets as `SIGNING_SECRET`
+3. Commit the public key (`cosign.pub`) to the repository
+
+
+
 ## Post-Installation Setup
 
 ### 1. Verify Tablet Hardware
