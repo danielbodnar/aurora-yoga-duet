@@ -101,8 +101,7 @@ The workflow is configured to automatically create the package on first push to 
 2. Push a commit to the `main` branch (or your repository's default branch)
 3. The package should be created automatically
 
-> **Note:** Manually triggering the workflow (via "Run workflow") will not create the package unless you select the default branch as the source. For most users, pushing to the default branch is the most reliable method.
-If you get a 403 error, try option 2.
+> **Note:** Manually triggering the workflow (via "Run workflow") will not create the package unless you select the default branch as the source. For most users, pushing to the default branch is the most reliable method. If you get a 403 error, try option 2.
 
 #### Option 2: Manual First Push
 
@@ -141,8 +140,6 @@ To enable image signing with cosign:
 
 2. Add the private key to repository secrets as `SIGNING_SECRET`
 3. Commit the public key (`cosign.pub`) to the repository
-
-
 
 ## Post-Installation Setup
 
