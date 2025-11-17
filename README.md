@@ -98,9 +98,10 @@ When forking this repository, the GitHub Actions workflow may fail with a 403 er
 The workflow is configured to automatically create the package on first push to the `main` branch. Simply:
 
 1. Ensure GitHub Actions is enabled in your fork (Settings → Actions → General)
-2. Push a commit to the `main` branch or manually trigger the workflow
+2. Push a commit to the `main` branch (or your repository's default branch)
 3. The package should be created automatically
 
+> **Note:** Manually triggering the workflow (via "Run workflow") will not create the package unless you select the default branch as the source. For most users, pushing to the default branch is the most reliable method.
 If you get a 403 error, try option 2.
 
 #### Option 2: Manual First Push
