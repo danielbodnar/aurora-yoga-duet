@@ -45,35 +45,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate image tags
-        id: generate-tags
-        shell: bash
+      - name: Lowercase Registry
         run: |
-          TIMESTAMP="$(date +%Y%m%d)"
-          BASE_TAG="${{ matrix.base_tag }}"
-          
-          # Create tags array - space-separated for buildah-build
-          TAGS="${BASE_TAG} ${BASE_TAG}-${TIMESTAMP}"
-          
-          if [[ "$BASE_TAG" == "latest" ]]; then
-            TAGS="${TAGS} latest"
-          fi
-          
-          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
-          echo "timestamp=${TIMESTAMP}" >> $GITHUB_OUTPUT
+          echo "IMAGE_REGISTRY=${IMAGE_REGISTRY,,}" >> ${GITHUB_ENV}
+          echo "IMAGE_NAME=${IMAGE_NAME,,}" >> ${GITHUB_ENV}
 
-      - name: Image Metadata
+      - name: Generate image tags and metadata
         uses: docker/metadata-action@v5
         id: meta
         with:
           images: |
             ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ matrix.base_tag }}
+            type=raw,value=${{ matrix.base_tag }}.{{date 'YYYYMMDD'}}
           labels: |
             org.opencontainers.image.title=Aurora Yoga Duet
             org.opencontainers.image.description=Aurora Linux customized for Lenovo Yoga Duet 7 13IML05
             org.opencontainers.image.vendor=${{ github.repository_owner }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
             io.artifacthub.package.readme-url=https://raw.githubusercontent.com/${{ github.repository }}/main/README.md
             io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/${{ github.repository_owner }}
+            containers.bootc=1
+          sep-tags: " "
+          sep-labels: "\n"
 
       - name: Build Image
         id: build_image
@@ -82,7 +77,7 @@ jobs:
           containerfiles: |
             ./Containerfile
           image: ${{ env.IMAGE_NAME }}
-          tags: ${{ steps.generate-tags.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}
           build-args: |
             BASE_IMAGE=${{ env.BASE_IMAGE }}
             BASE_TAG=${{ matrix.base_tag }}
@@ -95,15 +90,9 @@ jobs:
           extra-args: |
             --pull=newer
 
-      - name: Lowercase Registry
-        id: registry_case
-        uses: ASzc/change-string-case-action@v6
-        with:
-          string: ${{ env.IMAGE_REGISTRY }}
-
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -112,29 +101,30 @@ jobs:
       - name: Push to GHCR
         uses: redhat-actions/push-to-registry@v2
         id: push
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         with:
-          image: ${{ steps.build_image.outputs.image }}
-          tags: ${{ steps.build_image.outputs.tags }}
-          registry: ${{ steps.registry_case.outputs.lowercase }}
+          image: ${{ env.IMAGE_NAME }}
+          tags: ${{ steps.meta.outputs.tags }}
+          registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ github.token }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.7.0
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
 
       - name: Sign container image
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
-          cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ steps.registry_case.outputs.lowercase }}/${{ env.IMAGE_NAME }}@${DIGEST}
+          for full_ref in ${{ steps.meta.outputs.tags }}; do
+            cosign sign -y --key env://COSIGN_PRIVATE_KEY $full_ref
+          done
         env:
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
-          DIGEST: ${{ steps.push.outputs.digest }}
 
       - name: Echo outputs
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           echo "Image: ${{ steps.push.outputs.registry-path }}"
           echo "Digest: ${{ steps.push.outputs.digest }}"
