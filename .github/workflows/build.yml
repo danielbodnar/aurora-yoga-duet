@@ -52,17 +52,14 @@ jobs:
           TIMESTAMP="$(date +%Y%m%d)"
           BASE_TAG="${{ matrix.base_tag }}"
           
-          # Create tags array
-          TAGS=()
-          TAGS+=("${BASE_TAG}")
-          TAGS+=("${BASE_TAG}-${TIMESTAMP}")
+          # Create tags array - space-separated for buildah-build
+          TAGS="${BASE_TAG} ${BASE_TAG}-${TIMESTAMP}"
           
           if [[ "$BASE_TAG" == "latest" ]]; then
-            TAGS+=("latest")
+            TAGS="${TAGS} latest"
           fi
           
-          # Convert to comma-separated for docker/metadata-action
-          echo "tags=$(IFS=,; echo "${TAGS[*]}")" >> $GITHUB_OUTPUT
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "timestamp=${TIMESTAMP}" >> $GITHUB_OUTPUT
 
       - name: Image Metadata
