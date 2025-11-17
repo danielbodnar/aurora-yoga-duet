@@ -102,15 +102,12 @@ jobs:
         uses: redhat-actions/push-to-registry@v2
         id: push
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        env:
-          REGISTRY_USER: ${{ github.actor }}
-          REGISTRY_PASSWORD: ${{ github.token }}
         with:
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ steps.meta.outputs.tags }}
           registry: ${{ env.IMAGE_REGISTRY }}
-          username: ${{ env.REGISTRY_USER }}
-          password: ${{ env.REGISTRY_PASSWORD }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.7.0
@@ -119,9 +116,8 @@ jobs:
       - name: Sign container image
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
-          IMAGE_FULL="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}"
-          for tag in ${{ steps.meta.outputs.tags }}; do
-            cosign sign -y --key env://COSIGN_PRIVATE_KEY $IMAGE_FULL:$tag
+          for full_ref in ${{ steps.meta.outputs.tags }}; do
+            cosign sign -y --key env://COSIGN_PRIVATE_KEY $full_ref
           done
         env:
           COSIGN_EXPERIMENTAL: false
